@@ -52,132 +52,6 @@ $(document).ready(function () {
       }
     }
   })
-  $("#search").click(function () {
-    $("#loading").show();
-    $.post("https://takenncs-tablet/search", JSON.stringify({ context: $("#searchContext").val() }));
-
-    setTimeout(() => { 
-      $("#profilePage").hide()
-      $("#mainElement").addClass("overflow-y-auto");
-      $("#loading").hide();
-      $("#resultSearching").show();
-    }, "300")
-  })
-  $("#searchimp").click(function () {
-    $("#loading").show();
-    $.post("https://takenncs-tablet/searchimp", JSON.stringify({ context: $("#searchContextImp").val() }));
-
-    setTimeout(() => { 
-      $("#loading").hide();
-      $("#resultSearching").show();
-    }, "300")
-  })  
-
-  $(document).on('click', '#spawnveh', function () {
-    let model = $(this).attr('model');
-    const options = {
-        title: 'Auto näitamine',
-        icon: 'question',
-        html: '<div><h4>Oled sa kindel, et soovid seda sõidukit näidata?</h4></div>',
-        showCancelButton: true,
-        confirmButtonColor: 'RoyalBlue',
-        cancelButtonColor: 'IndianRed',
-        allowEscapeKey: false,
-        allowOutsideClick: false,
-        cancelButtonText: 'Loobu',
-        confirmButtonText: 'Kinnita',
-        keydownListenerCapture: true,
-    };
-
-    Swal.fire(options).then((result) => {
-        if (result.isConfirmed) {
-            const data = { model: model };
-            $.post('https://takenncs-tablet/showVehicle', JSON.stringify(data));
-        }
-    });
-});
-
-$(document).on('click', '#spawnvehimp', function () {
-  let model = $(this).attr('model');
-  const options = {
-      title: 'Auto näitamine',
-      icon: 'question',
-      html: '<div><h4>Oled sa kindel, et soovid seda sõidukit näidata?</h4></div>',
-      showCancelButton: true,
-      confirmButtonColor: 'RoyalBlue',
-      cancelButtonColor: 'IndianRed',
-      allowEscapeKey: false,
-      allowOutsideClick: false,
-      cancelButtonText: 'Loobu',
-      confirmButtonText: 'Kinnita',
-      keydownListenerCapture: true,
-  };
-
-  Swal.fire(options).then((result) => {
-      if (result.isConfirmed) {
-          const data = { model: model };
-          $.post('https://takenncs-tablet/showVehicleImp', JSON.stringify(data));
-      }
-  });
-});
-
-$(document).on('click', '#sellveh', function () {
-  let model = $(this).attr('model');
-  Swal.fire({
-    title: 'Sõiduki müümine',
-    icon: 'question',
-    html: '<div><h4>Sisestage isiku isikukood:</h4></div>\n      <input type="text" id="citizenid" class="swal2-input" placeholder="Isikukood (ID-Kaart)">',
-    showCancelButton: true,
-    confirmButtonColor: 'RoyalBlue',
-    cancelButtonColor: 'IndianRed',
-    allowEscapeKey: false,
-    allowOutsideClick: false,
-    cancelButtonText: 'Loobu',
-    confirmButtonText: 'Kinnita',
-    keydownListenerCapture: true,
-    preConfirm: () => {
-      const citizenId = Swal.getPopup().querySelector('#citizenid').value;
-      if (!citizenId) {
-        Swal.showValidationMessage('Palun sisesta isiku isikukood kellel soovite seda müüa!');
-      } else {
-        const data = {
-          model: model,
-          citizenId: citizenId
-        };
-        $.post('https://takenncs-tablet/sellVehicle', JSON.stringify(data));
-      }
-    },
-  });
-});
-
-$(document).on('click', '#sellvehimp', function () {
-  let model = $(this).attr('model');
-  Swal.fire({
-    title: 'Sõiduki müümine',
-    icon: 'question',
-    html: '<div><h4>Sisestage isiku isikukood:</h4></div>\n      <input type="text" id="citizenid" class="swal2-input" placeholder="Isikukood (ID-Kaart)">',
-    showCancelButton: true,
-    confirmButtonColor: 'RoyalBlue',
-    cancelButtonColor: 'IndianRed',
-    allowEscapeKey: false,
-    allowOutsideClick: false,
-    cancelButtonText: 'Loobu',
-    confirmButtonText: 'Kinnita',
-    keydownListenerCapture: true,
-    preConfirm: () => {
-      const citizenId = Swal.getPopup().querySelector('#citizenid').value;
-      if (!citizenId) {
-        Swal.showValidationMessage('Palun sisesta isiku isikukood kellel soovite seda müüa!');
-      } else {
-        const data = {
-          model: model,
-          citizenId: citizenId
-        };
-        $.post('https://takenncs-tablet/sellVehicleImp', JSON.stringify(data));
-      }
-    },
-  });
-});
 
 $(document).on('click', '#despawnvehimp', function () {
   let model = $(this).attr('model');
@@ -200,7 +74,7 @@ function showNotification(title, text, type) {
 }
 function search() {
   $('#loading').show()
-  if (zone === 'tunershop') {
+  if (zone === '-') {
     $.post(
       'https://takenncs-tablet/search',
       JSON.stringify({ context: $('#searchContext').val() })
@@ -211,16 +85,96 @@ function search() {
     $('#loading').hide()
   }, '300')
 }
-
 function searchimp() {
-  $('#loading').show()
-  if (zone === 'tunershop') {
+  $('#loading').show();
+  if (zone === '-') {
     $.post(
       'https://takenncs-tablet/searchimp',
       JSON.stringify({ context: $('#searchContextImp').val() })
-    )
+    );
   }
   setTimeout(() => {
-    $('#loading').hide()
-  }, '300')
+    $('#loading').hide();
+  }, 300);
 }
+
+function startDeal(item) {
+  $.post(`https://${GetParentResourceName()}/startDrugSale`, JSON.stringify({
+    item: item
+  }));
+}
+
+function renderLeaderboard(data) {
+  const tbody = document.getElementById("leaderboard-body");
+  tbody.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td colspan="4" class="empty-message" style="text-align: center; font-style: italic; color: #888;">
+      The leaderboard is currently empty.
+    </td>`;
+    tbody.appendChild(row);
+    document.getElementById("user-rank").innerText = "-";
+    document.getElementById("user-points").innerText = "-";
+    return;
+  }
+
+  let userRank = "-";
+  let userPoints = "-";
+
+  data.forEach((entry, index) => {
+    if (entry.playerName === userName) {
+      userRank = index + 1;
+      userPoints = entry.points;
+    }
+    const row = document.createElement("tr");
+    row.classList.add("bg-gray-900", "hover:bg-gray-700");
+    row.innerHTML = `
+      <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">${index + 1}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-white">${entry.playerName}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${entry.points}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${entry.soldItems}</td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  document.getElementById("user-rank").innerText = userRank;
+  document.getElementById("user-points").innerText = userPoints;
+}
+
+window.addEventListener('message', (event) => {
+  if (event.data.action === 'updateLeaderboard') {
+    renderLeaderboard(event.data.leaderboard);
+  }
+
+  if (event.data.type === 'openTablet') {
+    userName = event.data.name;
+    document.getElementById('PlayerName').innerText = userName;
+    document.getElementById('grade').innerText = event.data.grade;
+
+    fetch(`https://${GetParentResourceName()}/requestLeaderboard`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  fetch(`https://${GetParentResourceName()}/requestLeaderboard`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  });
+});
+
+let userName = null;
+
+$(document).on("click", "#startRivalry", function () {
+  $.post('https://takenncs-tablet/startTurf', JSON.stringify({}));
+});
+window.addEventListener('message', (event) => {
+  if (event.data.action === 'updateLeaderboard') {
+    renderLeaderboard(event.data.leaderboard); // ← määrab rank ja points
+  }
+});
