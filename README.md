@@ -30,7 +30,7 @@ Ensure the following resources are running on your server:
 
 1. **Download or clone** this repository:
    ```bash
-   git clone https://github.com/Takennncs/takenncs-tablet.git
+   git clone https://github.com/Takennncs/takenncs-tabletv2.git
 
 # Ox_inventory - item:
    ```bash
